@@ -15,6 +15,12 @@ export default function RegisterPage() {
     async function onSubmit(e: React.FormEvent) {
         e.preventDefault();
         setMsg(null);
+
+        if (password !== confirm) {
+            setMsg("Passwords do not match");
+            return;
+        }
+
         setLoading(true);
 
         const res = await fetch("/api/register", {
@@ -29,8 +35,13 @@ export default function RegisterPage() {
             setMsg("Registered! Redirecting to login...");
             setTimeout(() => router.push("/login"), 700);
         } else {
-            const data = await res.json().catch(() => ({}));
-            setMsg(data.error ?? "Registration failed");
+            const text = await res.text();
+            try {
+                const data = JSON.parse(text) as { error?: string };
+                setMsg(data.error ?? "Registration failed");
+            } catch {
+                setMsg(text || "Registration failed");
+            }
         }
     }
 
