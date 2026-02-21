@@ -29,12 +29,14 @@ async function ensureOwnedTxn(userId: string, id: string) {
     });
 }
 
-export async function GET(_req: Request, ctx: { params: { id: string } }) {
+type RouteContext = { params: Promise<{ id: string }> };
+
+export async function GET(_req: Request, ctx: RouteContext) {
     const session = await getServerSession(authOptions);
     const userId = getUserId(session);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const parsedParams = paramsSchema.safeParse(ctx.params);
+    const parsedParams = paramsSchema.safeParse(await ctx.params);
     if (!parsedParams.success) {
         return NextResponse.json(
             { error: "Invalid id", details: parsedParams.error.flatten() },
@@ -53,12 +55,12 @@ export async function GET(_req: Request, ctx: { params: { id: string } }) {
     return NextResponse.json(txn);
 }
 
-export async function PATCH(req: Request, ctx: { params: { id: string } }) {
+export async function PATCH(req: Request, ctx: RouteContext) {
     const session = await getServerSession(authOptions);
     const userId = getUserId(session);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const parsedParams = paramsSchema.safeParse(ctx.params);
+    const parsedParams = paramsSchema.safeParse(await ctx.params);
     if (!parsedParams.success) {
         return NextResponse.json(
             { error: "Invalid id", details: parsedParams.error.flatten() },
@@ -114,12 +116,12 @@ export async function PATCH(req: Request, ctx: { params: { id: string } }) {
     return NextResponse.json(updated);
 }
 
-export async function DELETE(_req: Request, ctx: { params: { id: string } }) {
+export async function DELETE(_req: Request, ctx: RouteContext) {
     const session = await getServerSession(authOptions);
     const userId = getUserId(session);
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const parsedParams = paramsSchema.safeParse(ctx.params);
+    const parsedParams = paramsSchema.safeParse(await ctx.params);
     if (!parsedParams.success) {
         return NextResponse.json(
             { error: "Invalid id", details: parsedParams.error.flatten() },
